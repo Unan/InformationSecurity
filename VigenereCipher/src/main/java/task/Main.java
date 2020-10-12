@@ -3,15 +3,16 @@ package task;
 public class Main {
     public static void main(String[] args) {
 
-        Vig vig = new Vig();
-        System.out.println((int) ' ');
+        System.out.println((int)'а');
 
-        String text = "альфа";
-        String key = "диего";
+        Vigenere vigenere = new Vigenere();
+
+        String text = "альфая";
+        String key = "бравоя";
         System.out.println("original: " + text);
-        String encrypt = vig.encrypt(key, text);
+        String encrypt = vigenere.encrypt(key, text);
         System.out.println("encrypted: " + encrypt);
-        String decrypt = vig.decrypt(key, encrypt);
+        String decrypt = vigenere.decrypt(key, encrypt);
         System.out.println("decrypted: " + decrypt);
 
     }
