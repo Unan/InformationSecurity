@@ -8,7 +8,7 @@ public class Vigenere {
 
     {
         for (char[] chars : genTable()) {
-            System.out.println(chars);
+//            System.out.println(chars);
         }
     }
 
@@ -21,50 +21,48 @@ public class Vigenere {
     }
 
     public String encrypt(char[] key, char[] text) {
-        char[] nText = new char[text.length];
-        int k;
-        int t;
+        char[] encrypted = new char[text.length];
         char[][] table = this.table;
 
         for (int i = 0; i < text.length; i++) {
-            k = (int)key[i] - offset;
-            t = (int)text[i] - offset;
-            nText[i] = table[k][t];
+            int k = (int)key[i] - offset;
+            int t = (int)text[i] - offset;
+//            System.out.println("k = " + k + " : " + "t = " + t);
+            encrypted[i] = table[k][t];
         }
-        return new String(nText);
+        return new String(encrypted);
     }
 
     public String decrypt(char[] key, char[] text) {
-        char[] nText = new char[text.length];
-        int k;
-        int t;
+        char[] decrypted = new char[text.length];
         char[][] table = this.table;
 
         for (int i = 0; i < text.length; i++) {
-            k = (int)key[i] - offset;
-            t = (int)text[i] - offset;
+            int k = (int)key[i] - offset;
+            int t = (int)text[i] - offset;
+//            System.out.println("k = " + k + " : " + "t = " + t);
             if (k > t) {
-                nText[i] = table[letters + (t - k)][0];
+                decrypted[i] = table[(t - k) + letters][0];
             } else {
-                nText[i] = table[t - k][0];
+                decrypted[i] = table[t - k][0];
             }
         }
-        return new String(nText);
+        return new String(decrypted);
     }
 
     private char[][] genTable() {
         char[][] table = new char[letters][letters];
 
         for (int i = 0; i < letters; i++) {
-            int off = i;
+            int shift = i;
 
             for (int j = 0; j < letters; j++) {
 
-                if(off == letters) {
-                    off = 0;
+                if(shift == letters) {
+                    shift = 0;
                 }
-                table[i][j] = (char)(offset + off);
-                off++;
+                table[i][j] = (char)(this.offset + shift);
+                shift++;
             }
         }
         return table;
