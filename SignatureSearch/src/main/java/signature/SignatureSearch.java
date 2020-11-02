@@ -24,6 +24,7 @@ public class SignatureSearch {
 
     private static boolean signatureMatch(File file, byte[] signature) throws IOException {
         byte[] fileBytes = Files.readAllBytes(file.toPath());
+
         for (int i = 0; i <= fileBytes.length - signature.length; i++) {
             if (fileBytes[i] == signature[0]) {
                 if (checkSubArray(fileBytes, signature, i)) {

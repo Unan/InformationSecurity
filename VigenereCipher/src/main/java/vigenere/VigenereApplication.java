@@ -10,12 +10,11 @@ import javax.swing.SwingUtilities;
 
 public class VigenereApplication extends JPanel {
 
-    private String outputText;
     private JButton encrypt = new JButton("Encrypt");
     private JButton decrypt = new JButton("Decrypt");
-    private JTextField keyArea = new JTextField("ключ", 35);
-    private JTextField textArea = new JTextField("привет мир!", 35);
-    private JTextField newTextArea = new JTextField(35);
+    private JTextField keyArea = new JTextField("ключ", 40);
+    private JTextField textArea = new JTextField("привет мир!", 40);
+    private JTextField newTextArea = new JTextField(40);
 
     private VigenereCipher vigenereCipher = new VigenereCipher();
 
@@ -29,8 +28,7 @@ public class VigenereApplication extends JPanel {
                 key = prolongKey(key, text);
                 printAction("encrypt", key, text);
             }
-            outputText = vigenereCipher.encrypt(key, text);
-            newTextArea.setText(outputText);
+            newTextArea.setText(vigenereCipher.encrypt(key, text));
         });
 
         decrypt.addActionListener(e -> {
@@ -41,8 +39,7 @@ public class VigenereApplication extends JPanel {
                 key = prolongKey(key, text);
                 printAction("decrypt", key, text);
             }
-            outputText = vigenereCipher.decrypt(key, text);
-            newTextArea.setText(outputText);
+            newTextArea.setText(vigenereCipher.decrypt(key, text));
 
         });
         add(new JLabel("Ключ:"));
@@ -70,7 +67,7 @@ public class VigenereApplication extends JPanel {
 
     private static void createAndShowGUI() {
         JFrame window = new JFrame("Шифр Виженера");
-        window.setSize(new Dimension(500, 200));
+        window.setSize(new Dimension(500, 220));
         window.setVisible(true);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.add(new VigenereApplication());
