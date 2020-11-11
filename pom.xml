@@ -11,6 +11,7 @@
     <modules>
         <module>VigenereCipher</module>
         <module>SignatureSearch</module>
+        <module>Steganography</module>
     </modules>
 
 
