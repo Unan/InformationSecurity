@@ -8,13 +8,13 @@ import java.util.stream.Collectors;
 public class Decoder {
 
     private static final String RUSSIAN_CHARACTERS = new String("аАВеЕКМНоОрРсСхХ".getBytes(), StandardCharsets.UTF_8);
-    private static final String ENGLISH_CHARACTERS = new String("aABeEKMHoOpPcCxX".getBytes(), StandardCharsets.UTF_8);
+    private static final String ENGLISH_CHARACTERS = "aABeEKMHoOpPcCxX";
     private static final String ENCODING = "Windows-1251";
 
     private static File containerWithSecret;
     private static File decodedSecret;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws UnsupportedEncodingException {
 
         if (args.length == 0) {
             args = new String[3];
@@ -46,7 +46,7 @@ public class Decoder {
             e.printStackTrace();
             return;
         }
-        writeOutput(decodedSecret, new String(text.toByteArray()));
+        writeOutput(decodedSecret, new String(text.toByteArray(), ENCODING));
     }
 
     private static BufferedReader getBufferedReader(File file) throws FileNotFoundException, UnsupportedEncodingException {

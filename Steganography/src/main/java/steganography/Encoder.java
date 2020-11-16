@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 public class Encoder {
 
     private static final String RUSSIAN_CHARACTERS = new String("аАВеЕКМНоОрРсСхХ".getBytes(), StandardCharsets.UTF_8);
-    private static final String ENGLISH_CHARACTERS = new String("aABeEKMHoOpPcCxX".getBytes(), StandardCharsets.UTF_8);
+    private static final String ENGLISH_CHARACTERS = "aABeEKMHoOpPcCxX";
     private static final String ENCODING = "Windows-1251";
 
     private static File container;
