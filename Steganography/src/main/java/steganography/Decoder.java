@@ -1,12 +1,6 @@
 package steganography;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.stream.Collectors;
@@ -33,23 +27,17 @@ public class Decoder {
         initFromArgs(args);
 
         BitSet text = new BitSet();
-        int indexOfBitsText = 0;
 
-        try (FileInputStream inputStream = new FileInputStream(containerWithSecret)) {
-            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, ENCODING)) {
-                try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
-
-                    String readAll = reader.lines().collect(Collectors.joining("\n"));
-
-                    for (int i = 0; i < readAll.length(); i++) {
-                        char original = readAll.charAt(i);
-
-                        if (canUseInDecryption(original)) {
-                            text.set(indexOfBitsText++, decode(original));
-                            if (indexOfBitsText - text.length() > 8) {
-                                break;
-                            }
-                        }
+        try {
+            String readAll = getBufferedReader(containerWithSecret)
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+            for (int i = 0, indexOfSecretBit = 0; i < readAll.length(); i++) {
+                char original = readAll.charAt(i);
+                if (usableForDecryption(original)) {
+                    text.set(indexOfSecretBit++, decode(original));
+                    if (indexOfSecretBit - text.length() > 8) {
+                        break;
                     }
                 }
             }
@@ -58,14 +46,20 @@ public class Decoder {
             e.printStackTrace();
             return;
         }
+        writeOutput(decodedSecret, new String(text.toByteArray()));
+    }
 
-        try (FileOutputStream outputStream = new FileOutputStream(decodedSecret)) {
+    private static BufferedReader getBufferedReader(File file) throws FileNotFoundException, UnsupportedEncodingException {
+        return new BufferedReader(new InputStreamReader(new FileInputStream(file), ENCODING));
+    }
+
+    private static void writeOutput(File outputFile, String result) {
+        try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
             try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, ENCODING)) {
-                writer.write(new String(text.toByteArray(), ENCODING));
-
+                writer.write(result);
             }
         } catch (IOException e) {
-            System.err.println("Не удаётся записать в файл по пути = " + decodedSecret);
+            System.err.println("Не удаётся записать в файл по пути = " + outputFile);
             e.printStackTrace();
         }
     }
@@ -100,18 +94,15 @@ public class Decoder {
         return true;
     }
 
-    private static boolean canUseInEncryption(char character) {
+    private static boolean usableForEncryption(char character) {
         return RUSSIAN_CHARACTERS.indexOf(character) > -1;
     }
 
-    private static boolean canUseInDecryption(char character) {
-        return canUseInEncryption(character) || ENGLISH_CHARACTERS.indexOf(character) > -1;
+    private static boolean usableForDecryption(char character) {
+        return usableForEncryption(character) || ENGLISH_CHARACTERS.indexOf(character) > -1;
     }
 
     private static boolean decode(char character) {
-        if (!canUseInDecryption(character)) {
-            throw new IllegalArgumentException("Не удаётся использовать символ '" + character + "' для шифрования");
-        }
         return ENGLISH_CHARACTERS.indexOf(character) > -1;
     }
 }

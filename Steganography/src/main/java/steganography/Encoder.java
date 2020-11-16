@@ -1,12 +1,6 @@
 package steganography;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.stream.Collectors;
@@ -36,47 +30,36 @@ public class Encoder {
 
         BitSet bitsOfSecret;
 
-        try (FileInputStream inputStream = new FileInputStream(secret)) {
-            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, ENCODING)) {
-                try (BufferedReader reader = new BufferedReader(inputStreamReader)) {
-                    bitsOfSecret = BitSet.valueOf(reader.lines().collect(Collectors.joining("\n")).getBytes(ENCODING));
-                }
-            }
+        try {
+            bitsOfSecret = BitSet.valueOf(getBufferedReader(secret).lines().collect(Collectors.joining("\n")).getBytes(ENCODING));
         } catch (IOException e) {
             System.err.println("Не удаётся прочитать файл по пути =" + container);
             e.printStackTrace();
             return;
         }
 
-        int bitIndexForContainer = 0;
+        StringBuilder containerTextWithSecret = new StringBuilder();
 
-        String containerTextWithSecret;
-
-        try (FileInputStream inputStream = new FileInputStream(container)) {
-            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, ENCODING)) {
-                try (BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-
-                    String containerText = bufferedReader.lines().collect(Collectors.joining("\n"));
-
-                    StringBuilder builder = new StringBuilder();
-                    for (int i = 0; i < containerText.length(); i++) {
-                        char original = containerText.charAt(i);
-                        if (bitIndexForContainer < bitsOfSecret.size() && canUseInEncryption(original)) {
-                            builder.append(encode(original, bitsOfSecret.get(bitIndexForContainer++)));
-                        } else {
-                            builder.append(original);
-                        }
-                    }
-
-                    containerTextWithSecret = builder.toString();
-                }
+        try {
+            String containerText = getBufferedReader(container)
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+            for (int i = 0, indexOfSecretBit = 0; i < containerText.length(); i++) {
+                char original = containerText.charAt(i);
+                containerTextWithSecret.append((indexOfSecretBit < bitsOfSecret.size() && usableForEncryption(original))
+                        ? encode(original, bitsOfSecret.get(indexOfSecretBit++))
+                        : original);
             }
         } catch (IOException e) {
             System.err.println("Не удаётся прочитать файл по пути = " + container);
             e.printStackTrace();
             return;
         }
-        writeOutput(containerWithSecret, containerTextWithSecret, container);
+        writeOutput(containerWithSecret, containerTextWithSecret.toString());
+    }
+
+    private static BufferedReader getBufferedReader(File file) throws FileNotFoundException, UnsupportedEncodingException {
+        return new BufferedReader(new InputStreamReader(new FileInputStream(file), ENCODING));
     }
 
     private static void initFromArgs(String[] args) {
@@ -85,13 +68,13 @@ public class Encoder {
         containerWithSecret = new File(args[2]);
     }
 
-    private static void writeOutput(File outputFile, String result, File fileForInject) {
+    private static void writeOutput(File outputFile, String result) {
         try (FileOutputStream outputStream = new FileOutputStream(outputFile)) {
             try (OutputStreamWriter writer = new OutputStreamWriter(outputStream, ENCODING)) {
                 writer.write(result);
             }
         } catch (IOException e) {
-            System.err.println("Не удаётся записать в файл по пути = " + fileForInject);
+            System.err.println("Не удаётся записать в файл по пути = " + outputFile);
             e.printStackTrace();
         }
     }
@@ -127,14 +110,11 @@ public class Encoder {
         return true;
     }
 
-    private static boolean canUseInEncryption(char character) {
+    private static boolean usableForEncryption(char character) {
         return RUSSIAN_CHARACTERS.indexOf(character) > -1;
     }
 
     private static char encode(char character, boolean bit) {
-        if (!canUseInEncryption(character)) {
-            throw new IllegalArgumentException("Не удаётся использовать символ '" + character + "' для шифрования");
-        }
         return bit ? ENGLISH_CHARACTERS.charAt(RUSSIAN_CHARACTERS.indexOf(character)) : character;
     }
 }
